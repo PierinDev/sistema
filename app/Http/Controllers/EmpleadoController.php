@@ -103,44 +103,38 @@ class EmpleadoController extends Controller
      */
     public function update(Request $request, $id)
     {
-
         $campos = [
             'Nombre' => 'required|string|max:100',
             'Apellidopaterno' => 'required|string|max:100',
             'Apellidomaterno' => 'required|string|max:100',
             'Correo' => 'required|email',
-
         ];
         $mensaje = [
             'required' => 'El :attribute es requerido',
         ];
 
-
         if ($request->hasFile('Foto')) {
-            $campos = ['Foto' => 'required|max:10000|mimes:jpeg,png,jpg'];
-            $mensaje = ['Foto.required' => 'La foto requerida'];
-        };
-
+            $campos['Foto'] = 'required|max:10000|mimes:jpeg,png,jpg';
+            $mensaje['Foto.required'] = 'La foto es requerida';
+        }
 
         $this->validate($request, $campos, $mensaje);
 
-
-        //
         $datosEmpleado = request()->except(['_token', '_method']);
 
         if ($request->hasFile('Foto')) {
             $empleado = Empleado::findOrFail($id);
 
-            Storage::delete('public/.$empleado->Foto');
+            Storage::delete('public/' . $empleado->Foto);
+
             $datosEmpleado['Foto'] = $request->file('Foto')->store('uploads', 'public');
         }
 
         Empleado::where('id', '=', $id)->update($datosEmpleado);
-        $empleado = Empleado::findOrFail($id);
-        //return view('empleado.edit', compact('empleado'));
 
         return redirect('empleado')->with('mensaje', 'Empleado editado');
     }
+
 
     /**
      * Remove the specified resource from storage.
